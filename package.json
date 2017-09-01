@@ -1,0 +1,17 @@
+{
+  "name": "instrument_schedule",
+  "version": "1.0.0",
+  "description": "instrument schedule tools for NCNR",
+  "main": "index.js",
+  "scripts": {
+    "start": "node convert_holidays.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "fs": "0.0.1-security",
+    "ical.js": "^1.2.2",
+    "request": "^2.81.0"
+  }
+}

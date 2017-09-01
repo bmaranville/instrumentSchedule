@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8' />
+  <link rel="shortcut icon" type="image/png" href="css/One-Month_Brand_Favicon.png"/>
+  <link type="text/css" href="css/fullcalendar.css" rel="stylesheet" />
+  <link type="text/css" href="css/fullcalendar.print.min.css" rel='stylesheet' media='print' />
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script type="text/javascript" src="js/moment.min.js"></script>
+  <script src="//code.jquery.com/jquery-3.1.1.min.js"></script>
+  <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script type="text/javascript" src="js/fullcalendar.min.js"></script>
+  <script type="text/javascript" src="js/EventListView.js"></script>
+  <script type="text/javascript" src="js/array-find-polyfill.js"></script>
+  <script type="text/javascript" src="js/ouical.js"></script>
+  <script type="text/plain" id="instrument_lookup">
+    $instruments = array(
+        array('id' => 1,        'name' => 'BT-1 -- High resolution powder diffractometer'),
+        array('id' => 20,       'name' => 'BT-2 -- Neutron Imaging Facility'),
+        array('id' => 12,       'name' => 'BT-4 -- FANS, Filter-analyzer neutron spectrometer'),
+        array('id' => 23,       'name' => 'BT-4 -- Triple-axis spectrometer'),
+        array('id' => 5,        'name' => 'BT-5 -- USANS, Perfect SANS (CHRNS)'),
+        array('id' => 9,        'name' => 'BT-7 -- Double-focusing Triple Axis Spectrometer'),
+        array('id' => 2,        'name' => 'BT-8 -- Residual stress diffractometer'),
+        array('id' => 72,       'name' => 'BT-9 -- Multiple Axis Crystal Spectrometer (MACS)'),
+        array('id' => 10,       'name' => 'BT-9 -- Triple-axis spectrometer'),
+        array('id' => 32,       'name' => 'NAA -- Neutron Activation Analysis'),
+        array('id' => 7,        'name' => 'NG-1 -- ANDR, Advanced Neutron Diffractometer Reflectometer'),
+        array('id' => 29,       'name' => 'NG-1 -- Cold neutron depth profiling'),
+        array('id' => 6,        'name' => 'NG-1 -- Cold neutron reflectometer-vertical sample-polarized beam option'),
+        array('id' => 15,       'name' => 'NG-2 -- HFBS, High-flux backscattering spectrometer (CHRNS)'),
+        array('id' => 4,        'name' => 'NG-3 -- 30-m SANS instrument (CHRNS)'),
+        array('id' => 14,       'name' => 'NG-4 -- DCS, Disk-chopper time-of-flight spectrometer (CHRNS)'),
+        array('id' => 16,       'name' => 'NG-5 -- NSE, Neutron spin echo spectrometer (CHRNS)'),
+        array('id' => 11,       'name' => 'NG-5 -- SPINS, Spin-polarized triple-axis spectrometer (CHRNS)'),
+        array('id' => 22,       'name' => 'NG-6 -- Fundamental neutron physics station'),
+        array('id' => 53,       'name' => 'NG-6m -- Neutron Physics 0.5 nm'),
+        array('id' => 52,       'name' => 'NG-6u -- Neutron Physics 0.89 nm'),
+        array('id' => 3,        'name' => 'NG-7 -- 30-m SANS instrument'),
+        array('id' => 8,        'name' => 'NG-7 -- Cold neutron reflectometer-horizontal sample'),
+        array('id' => 21,       'name' => 'NG-7 -- Neutron interferometer'),
+        array('id' => 17,       'name' => 'NG-7 -- Prompt-gamma neutron activation analysis'),
+        array('id' => 113,      'name' => 'NG-D -- Off-Specular Reflectometer (MAGIK)'),
+        array('id' => 112,      'name' => 'NG-D -- Polarized Beam Reflectometer/Diffractometer (PBR)'),
+        array('id' => 18,       'name' => 'VT-5 -- Thermal-neutron prompt-gamma activation analysis'),
+        array('id' => 92,       'name' => 'BD8XRAY -- Bruker D8 X-ray Reflectometer')
+   );
+  </script>
+  <script type="text/javascript" src="js/ims_fullcal.js"></script>
+  <script type="text/javascript" src="js/geturlvars.js"></script>
+  <script type="text/javascript" src="js/holidays.js" charset="UTF-8"></script>
+  <script type="text/javascript" src="js/reactor_schedule.js" charset="UTF-8"></script>
+<!--
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.10/handlebars.min.js"></script>
+-->
+<!--
+  <script id="item-template" type="text/x-handlebars-template">
+    <div class="entry">
+      <h1>{{Title}}</h1>
+      <h2>ID: {{ID}}</h2>
+      <div class="body">
+        
+        {{body}}
+      </div>
+    </div>
+  </script>
+-->
+  <script type="text/javascript">
+    var sources = {};
+    var colors = [
+      ["CadetBlue", "white"],
+      ["BurlyWood", "black"],
+      ["SeaGreen", "white"],
+      ["pink", "black"]
+    ];
+    
+    function show_summary(summary) {
+      var dialog = $("#info_dialog")
+      dialog.find(".title").text(summary.Title);
+      dialog.find(".length-days").text(summary["# of Days"]);
+      dialog.find(".add-to-calendar").replaceWith(
+        createCalendar({
+          options: { class: 'ui-button' },
+          data:{
+            title: summary.instrument_name + " experiment: " + summary.Title, 
+            start: new Date(summary["Start Date"]),
+            duration: parseFloat(summary["# of Days"]) * 24 * 60, // minutes
+            address: "NIST Center for Neutron Research: " + summary.instrument_name + " instrument",
+            description: summary.Title + '\nParticipants: ' + summary.Participants.map(function(p) { return p.name }).join(', ')
+          }
+        }));
+      dialog.find(".start-date").text(summary["Start Date"]);
+      dialog.find(".equipment").text(summary["Equipment"]);
+      dialog.find(".local-contact").text(summary["Contact"]);
+      var participants = summary.Participants;
+      var participants_item = dialog.find(".participants-list");
+      participants_item.empty();
+      participants.forEach(function(p, i) {
+        var classname = (p.principalInvestigator) ? "principalInvestigator": null;
+        var html =  p.name + '<sup>' + p.affiliation_index + ((p.principalInvestigator) ? ",PI" : "") + '</sup>';
+        participants_item.append($("<li />", {class: classname, html: html}));
+      });
+      var institutions = summary.affiliations;
+      var institutions_item = dialog.find(".institutions-list");
+      institutions_item.empty();
+      institutions.forEach(function(p, i) {
+        institutions_item.append($("<li />", {html: p}));
+      });
+      $("#info_dialog").dialog({height: 'auto', width: 'auto', title: summary.instrument_name + " " + summary.ID});
+      $(".ui-dialog-titlebar").addClass("ui-state-active");
+    }
+    
+    $(document).ready(function() {
+      var instruments_to_load = ($.getUrlVar('instruments') || "").split(",").map(function(inst) { return inst.toUpperCase() }) ;
+      var id_to_load = $.getUrlVar('instrId');
+      if (id_to_load != null) {
+        var instrument = Object.keys(instrument_numbers).find(function(n) { return instrument_numbers[n] == id_to_load });
+        if (instrument != null) {
+          instruments_to_load = [instrument]
+        }
+      }
+      
+      // experimental: test using raw string from Siddharth to build instruments lookup
+      var instr_lookup_str = $("#instrument_lookup").text();
+      var extract_regex = /\('id'\s*=>\s*([0-9]+),\s*'name'\s*=>\s*'(\S+)\s*--\s*([^']*)'\)/g;
+      instr_lookup = [];
+      var match = extract_regex.exec(instr_lookup_str);
+      while (match != null) {
+        instr_lookup.push(match.slice(1,4));
+        //instr_lookup[match[2]] = {id: match[1], description: match[3]};
+        match = extract_regex.exec(instr_lookup_str);
+      }
+      // end experimental lookup 
+      
+      //var dialog_source = $("#item-template").html();
+      //var item_template = Handlebars.compile(dialog_source);
+      
+      $('#calendar').fullCalendar({
+        header: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'month,basicWeek,table,short'
+        },
+        theme: true,
+        //customButtons: {newevent: {text: 'newevent'}},
+        allDayDefault: true,
+        navLinks: true, // can click day/week names to navigate views
+        editable: false,
+        eventClick: function(calEvent, jsEvent, view) {
+          if (calEvent.data) { show_summary(calEvent.data); }
+        },
+        events: [], // events_source // put your options and callbacks here
+        views: {
+          newevent: {
+            type: "newlist",
+            duration: {year: 1},
+            buttonText: "list"
+          },
+          short: {
+            type: "shortlist",
+            duration: {year: 1},
+            buttonText: "short"
+          }
+        }
+      })
+      
+      var instr_num = 0;
+      instruments_to_load.forEach(function(k) {
+        if (k in instrument_numbers) {
+          var color_pair = colors[instr_num++%colors.length];
+          var legend = $("<span />", {class: "instrument-legend", text: k, style: "background-color:" + color_pair[0] + ";color:" + color_pair[1] + ";"});
+          $("#instrument_select").append(legend);
+          sources[k] = get_events(k);
+          sources[k].color = color_pair[0];
+          sources[k].textColor = color_pair[1];
+          $("#calendar").fullCalendar('addEventSource', sources[k]);
+        }
+        /*
+        else if (k == 'HOLIDAYS') {
+          holidays.forEach(function(h) { h.allDay = true });
+          $("#calendar").fullCalendar('addEventSource', holidays);
+        }
+        else if (k == 'REACTOR') {
+          $("#calendar").fullCalendar('addEventSource', reactor_schedule);
+        }
+        */
+      });
+      
+      // add holidays
+      holidays.forEach(function(h) { h.allDay = true });
+      $("#calendar").fullCalendar('addEventSource', holidays);
+      
+      // add reactor schedule
+      $("#calendar").fullCalendar('addEventSource', reactor_schedule);
+    });
+  </script>
+  <style>
+
+    body {
+      margin: 40px 10px;
+      padding: 0;
+      font-family: "Lucida Grande",Helvetica,Arial,Verdana,sans-serif;
+      /*font-size: 14px;*/
+    }
+
+    #calendar {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    div#instrument_select_wrapper {
+       text-align: center;
+    }
+    
+    div#instrument_select{
+       max-width: 900px;
+       margin: 0 auto;
+    }
+    
+    div#info_dialog {
+       display: none;
+       max-width: 900px;
+    }
+    
+    div#info_dialog .participants {
+      display: inline-block;
+      padding-bottom: 0.5em;
+    }
+    
+    div#info_dialog .participants-list, div#info_dialog .institutions-list {
+      display: inline-block;
+      vertical-align: top;
+      margin: 0px;
+    }
+    
+    div#info_dialog .institutions ol li {
+      float:left;
+      padding-right: 2em;
+      list-style-type:decimal;
+      font-size: 80%;
+      font-style: italic;
+    }
+    
+    td.fc-event-container {
+      cursor: pointer;
+    }
+    
+    li.principalInvestigator {
+      font-weight: bold;
+      /*list-style-type: circle;*/
+      /*text-decoration: underline;*/
+      /*border: 1px solid black;*/
+    }
+    
+    .fc-list-table td {
+      padding: 6px;
+    }
+    .fc-day-grid-event > .fc-content {
+      white-space: normal;
+    }
+    
+    span.instrument-legend {
+      padding-left: 1em;
+      padding-right: 1em;
+      border-radius: 4px;
+    }
+    
+    table.schedule-table ol, table.schedule-table ul {
+      margin: 0em 1em 0em 1em;
+      padding: 0px;
+      padding-left: 0px;
+      padding-right: 0px;
+    }
+    
+    .fc-scroller {
+      overflow-x: auto !important;
+    }
+    
+    div.add-to-calendar {
+      display: inline-block;
+      text-align: left;
+    }
+  </style>
+</head>
+
+<body>
+   <div id="calendar"></div>
+   <div id="instrument_select_wrapper">
+     <div id="instrument_select"></div>
+   </div>
+   <div id="info_dialog">
+    <h3 class="title"></h3>
+    <div>Start Date: <span class="start-date"></span><div class="add-to-calendar"></div></div>
+    <div>Length: <span class="length-days"></span> days</div><hr>
+    <div class="participants">Participants: <ul class="participants-list"></ul></div>
+    <div class="institutions"><ol class="institutions-list"></ol></div><hr>
+    <div>Equipment: <span class="equipment"></span></div>
+    <div>Contact: <span class="local-contact"></span></div>
+   </div>
+</body>
+
+</html>
