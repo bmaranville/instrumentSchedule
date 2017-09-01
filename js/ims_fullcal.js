@@ -55,7 +55,7 @@ function get_items(instrument) {
 function convert_to_fullcal(item) {
   var fullcal = {};
   var start = new Date(item["Start Date"]);
-  //start.setHours(0); // reset to midnight...
+  start.setHours(0); // reset to midnight...
   var title = item["ID"] + " ";
   var participants = item.Participants;
   var primaryInvestigator = (participants.find(function(p) { return p.principalInvestigator == true }) || {}).name || "";
