@@ -161,6 +161,38 @@
             duration: {year: 1},
             buttonText: "short"
           }
+        },
+        viewRender: function(fc) {
+          var title = $(".fc-header-toolbar .fc-center h2");
+          var date = title.text().split(" "),
+              active_month = date[0],
+              active_year = date[1];
+          var monthselect = $("<select />", {class: "month-select"});
+          var months = ["January", "February", "March", "April", "May", "June", "July",
+            "August", "September", "October", "November", "December"]
+          months.forEach(function(m,i) {
+            var monthoption = $("<option />", {text: m, value: m, numbervalue: i});
+            monthselect.append(monthoption);
+          });
+          var start_year = 1997;
+          var end_year = (new Date()).getFullYear() + 2;
+          var yearselect = $("<select />", {class: "year-select"});
+          for (var year = start_year; year < end_year; year++) {
+            yearselect.append($("<option />", {text: year, value: year}));
+          }
+          yearselect.val(active_year);
+          monthselect.val(active_month);
+          title.empty().append(monthselect);
+          title.append(yearselect);
+          function jump() {
+            var y = yearselect.val();
+            var m = (months.indexOf(monthselect.val()) + 1).toFixed();
+            m = (m.length == 1) ? "0" + m : m;
+            var jumppoint = $.fullCalendar.moment(y + '-' + m + '-01');
+            fc.calendar.gotoDate(jumppoint);
+          }
+          yearselect.on("change", jump);
+          monthselect.on("change", jump);          
         }
       })
       
@@ -279,6 +311,16 @@
     div.add-to-calendar {
       display: inline-block;
       text-align: left;
+    }
+    
+    select.month-select, select.year-select {
+      background-color: white;
+      border: none;
+      margin-right: 0.5em;
+      user-select: none;
+    }
+    select:active, select:hover, select:focus {
+      outline: none
     }
   </style>
 </head>
