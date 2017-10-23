@@ -34,13 +34,19 @@ var instrument_numbers = {
 var calendar_url = "https://www-s.nist.gov/NCNR-IMS/instrumentSchedule.do?instrId=";
 //var calendar_url = "https://www.ncnr.nist.gov/instruments/magik/php/instrument_schedule.php?id=";
 //var calendar_url = "https://tstweb.nist.gov:7302/NCNR-IMS/instrumentSchedule.do?instrId=";
+var events_cache = {};
 
 function get_events(instrument) {
     return {
         events: function(start, end, timezone, callback) {
+          if (events_cache[instrument] != null) {
+            callback(events_cache[instrument]);
+          } else {
             $.get(calendar_url + instrument_numbers[instrument].toFixed() + "&type=json").then(function(schedule) {
-                callback(schedule.map(convert_to_fullcal, {instrument: instrument}));
+                events_cache[instrument] = schedule.map(convert_to_fullcal, {instrument: instrument});
+                callback(events_cache[instrument]);
             }).fail(function() { callback([]) });
+          }
         }
     }
 }

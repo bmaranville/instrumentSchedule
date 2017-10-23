@@ -156,6 +156,11 @@
             duration: {year: 1},
             buttonText: "list"
           },
+          table: {
+            type: "fulltable",
+            duration: {year: 1},
+            buttonText: "table"
+          },
           short: {
             type: "shortlist",
             duration: {year: 1},
@@ -163,36 +168,47 @@
           }
         },
         viewRender: function(fc) {
-          var title = $(".fc-header-toolbar .fc-center h2");
-          var date = title.text().split(" "),
-              active_month = date[0],
+          var active_month = "January", active_year = "1998";
+          if (fc.type == 'month' || fc.type == 'short' || fc.type == 'table') {
+            var title = $(".fc-header-toolbar .fc-center h2");
+            var date = title.text().split(" ");
+            if (fc.type == 'month') {
+              active_month = date[0];
               active_year = date[1];
-          var monthselect = $("<select />", {class: "month-select"});
-          var months = ["January", "February", "March", "April", "May", "June", "July",
-            "August", "September", "October", "November", "December"]
-          months.forEach(function(m,i) {
-            var monthoption = $("<option />", {text: m, value: m, numbervalue: i});
-            monthselect.append(monthoption);
-          });
-          var start_year = 1997;
-          var end_year = (new Date()).getFullYear() + 2;
-          var yearselect = $("<select />", {class: "year-select"});
-          for (var year = start_year; year < end_year; year++) {
-            yearselect.append($("<option />", {text: year, value: year}));
+            } else {
+              active_year = date[0];
+            }
+            var monthselect = $("<select />", {class: "month-select"});
+            var months = ["January", "February", "March", "April", "May", "June", "July",
+              "August", "September", "October", "November", "December"]
+            months.forEach(function(m,i) {
+              var monthoption = $("<option />", {html: "<h2>"+m+"</h2>", value: m, numbervalue: i});
+              monthselect.append(monthoption);
+            });
+            var start_year = 1998;
+            var end_year = (new Date()).getFullYear() + 2;
+            var yearselect = $("<select />", {class: "year-select"});
+            for (var year = start_year; year < end_year; year++) {
+              yearselect.append($("<option />", {text: year, value: year}));
+            }
+            title.empty();
+            monthselect.val(active_month);
+            if (fc.type == 'month') {
+              title.append(monthselect);
+            }
+            yearselect.val(active_year);
+            title.append(yearselect);
+
+            function jump() {
+              var y = yearselect.val();
+              var m = (months.indexOf(monthselect.val()) + 1).toFixed();
+              m = (m.length == 1) ? "0" + m : m;
+              var jumppoint = $.fullCalendar.moment(y + '-' + m + '-01');
+              fc.calendar.gotoDate(jumppoint);
+            }
+            yearselect.on("change", jump);
+            monthselect.on("change", jump);
           }
-          yearselect.val(active_year);
-          monthselect.val(active_month);
-          title.empty().append(monthselect);
-          title.append(yearselect);
-          function jump() {
-            var y = yearselect.val();
-            var m = (months.indexOf(monthselect.val()) + 1).toFixed();
-            m = (m.length == 1) ? "0" + m : m;
-            var jumppoint = $.fullCalendar.moment(y + '-' + m + '-01');
-            fc.calendar.gotoDate(jumppoint);
-          }
-          yearselect.on("change", jump);
-          monthselect.on("change", jump);          
         }
       })
       
@@ -229,7 +245,7 @@
   <style>
 
     body {
-      margin: 40px 10px;
+      margin: 0px;
       padding: 0;
       font-family: "Lucida Grande",Helvetica,Arial,Verdana,sans-serif;
       /*font-size: 14px;*/
@@ -237,7 +253,7 @@
 
     #calendar {
       max-width: 1000px;
-      margin: 0 auto;
+      margin: 10px auto;
     }
     
     div#instrument_select_wrapper {
@@ -314,23 +330,79 @@
     }
     
     select.month-select, select.year-select {
-      background-color: white;
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      background: url(css/downarrow.png) no-repeat right #ffffff;
       border: none;
       margin-right: 0.5em;
-      user-select: none;
+      padding-right: 1em;
+      font-weight: bold;
+      text-align-last: right;
     }
     select:active, select:hover, select:focus {
       outline: none
     }
   </style>
+  <style id="drupal_header">
+    header.top {
+        background: url(//nist.gov/sites/all/themes/nist_style/images/build/bg_pattern.png) repeat #1574b3;
+    }
+
+    div.section-header {
+        background: linear-gradient(to right,rgba(0,0,0,0),#12659c);
+    }
+
+    @media screen and (min-width: 1200px)
+    .section-header__main {
+        padding-right: 11.2px;
+        padding-right: 0.7rem;
+        padding-left: 11.2px;
+        padding-left: 0.7rem;
+    }
+    .section-header__main {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding-right: 27.2px;
+        padding-right: 1.7rem;
+        padding-left: 27.2px;
+        padding-left: 1.7rem;
+        position: relative;
+        color: white;
+    }
+
+    h2.section-header__title {
+        text-transform: uppercase;
+        margin-top: 0;
+        margin-bottom: 0;
+        padding-top: 20px;
+        padding-top: 1.25rem;
+        padding-bottom: 20px;
+        padding-bottom: 1.25rem;
+        font-size: 1.65rem;
+        font-style: normal;
+    }
+    
+    h2.section-header__title a {
+        text-decoration: none;
+        color: white;
+    }
+  </style>
 </head>
 
 <body>
-   <div id="calendar"></div>
-   <div id="instrument_select_wrapper">
+  <header class="top">
+    <div class="section-header">
+      <div class="section-header__main">
+        <h2 class="section-header__title"><a href="https://www.nist.gov/ncnr">NIST Center for Neutron Research</a></h2>
+      </div>
+    </div>    
+  </header>
+  <div id="calendar"></div>
+  <div id="instrument_select_wrapper">
      <div id="instrument_select"></div>
-   </div>
-   <div id="info_dialog">
+  </div>
+  <div id="info_dialog">
     <h3 class="title"></h3>
     <div>Start Date: <span class="start-date"></span><div class="add-to-calendar"></div></div>
     <div>Length: <span class="length-days"></span> days</div><hr>
@@ -338,7 +410,7 @@
     <div class="institutions"><ol class="institutions-list"></ol></div><hr>
     <div>Equipment: <span class="equipment"></span></div>
     <div>Contact: <span class="local-contact"></span></div>
-   </div>
+  </div>
 </body>
 
 </html>

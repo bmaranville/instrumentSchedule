@@ -63,7 +63,7 @@ Responsible for the scroller, and forwarding event-related actions into the "gri
 
   });
   
-  FC.views.table = FC.views.list.class.extend({
+  FC.views.fulltable = FC.views.list.class.extend({
     renderEvents: function(events) {
       var headers = ["Start Date", "# of Days", "ID", "Title", "Participants", "Institution Name", "Equipment", "Contact"]
       var renderers = {
@@ -90,7 +90,7 @@ Responsible for the scroller, and forwarding event-related actions into the "gri
         }
       }
         
-      //this.el.addClass("fc-listYear-view"); 
+      this.el.addClass("fc-listYear-view"); 
       var target = $("<table />" , {class: "schedule-table fc-list-table"})
       var thead; target.append(thead = $("<thead />"));
       var theadrow; thead.append(theadrow = $("<tr />"));
