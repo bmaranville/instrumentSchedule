@@ -47,6 +47,7 @@
    );
   </script>
   <script type="text/javascript" src="js/ims_fullcal.js"></script>
+  <script type="text/javascript" src="js/sans_fullcal.js"></script>
   <script type="text/javascript" src="js/geturlvars.js"></script>
   <script type="text/javascript" src="js/holidays.js" charset="UTF-8"></script>
   <script type="text/javascript" src="js/reactor_schedule.js" charset="UTF-8"></script>
@@ -67,6 +68,7 @@
 -->
   <script type="text/javascript">
     var sources = {};
+    var sans_sources = {};
     var colors = [
       ["CadetBlue", "white"],
       ["BurlyWood", "black"],
@@ -222,6 +224,15 @@
           sources[k].color = color_pair[0];
           sources[k].textColor = color_pair[1];
           $("#calendar").fullCalendar('addEventSource', sources[k]);
+        }
+        if (k in sans_instruments) {
+          var color_pair = colors[instr_num++%colors.length];
+          var legend = $("<span />", {class: "instrument-legend", text: k, style: "background-color:" + color_pair[0] + ";color:" + color_pair[1] + ";"});
+          $("#instrument_select").append(legend);
+          sans_sources[k] = get_sans_events(sans_instruments[k]);
+          sans_sources[k].color = color_pair[0];
+          sans_sources[k].textColor = color_pair[1];
+          $("#calendar").fullCalendar('addEventSource', sans_sources[k])
         }
         /*
         else if (k == 'HOLIDAYS') {
