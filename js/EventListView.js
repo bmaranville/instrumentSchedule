@@ -7,7 +7,7 @@ Responsible for the scroller, and forwarding event-related actions into the "gri
   var Grid = FC.Grid;
   var Scroller = FC.Scroller;
 
-  FC.views.newlist = FC.views.list.class.extend({
+  FC.views.newlist = FC.View.extend({
     renderEvents: function(events) {
       this.el.addClass("fc-listYear-view"); 
       var target = $("<table />" , {class: "fc-list-table"}).append($("<tbody />"));
@@ -35,7 +35,42 @@ Responsible for the scroller, and forwarding event-related actions into the "gri
 
   });
   
-  FC.views.shortlist = FC.views.list.class.extend({
+  FC.views.shortlist = FC.View.extend({
+    constructor: function() {
+      View.apply(this, arguments);
+
+      this.scroller = new Scroller({
+        overflowX: 'auto',
+        overflowY: 'auto'
+      });
+    },
+
+
+    renderSkeleton: function() {
+      this.el.addClass(
+        'fc-list-view ' +
+        this.calendar.theme.getClass('listView')
+      );
+
+      this.scroller.render();
+      this.scroller.el.appendTo(this.el);
+
+      this.contentEl = this.scroller.scrollEl; // shortcut
+    },
+    
+    unrenderSkeleton: function() {
+      this.scroller.destroy(); // will remove the Grid too
+    },
+
+    updateSize: function(totalHeight, isAuto, isResize) {
+      this.scroller.setHeight(this.computeScrollerHeight(totalHeight));
+    },
+
+    computeScrollerHeight: function(totalHeight) {
+      return totalHeight -
+        subtractInnerElHeight(this.el, this.scroller.el); // everything that's NOT the scroller
+    },
+    
     renderEvents: function(events) {
       this.el.addClass("fc-listYear-view"); 
       var target = $("<table />" , {class: "fc-list-table"}).append($("<tbody />"));
@@ -47,7 +82,7 @@ Responsible for the scroller, and forwarding event-related actions into the "gri
         if (ev.data) {
           if (ev.data.instrument_name != instrument) {
             instrument = ev.data.instrument_name;
-            target.append($("<tr />").append($("<td />", {html: "<b>Instrument: " + instrument + "</b>", colspan: 10, style: "text-align: center;background-color:LightGrey;"})));
+            target.append($("<tr />").append($("<td />", {html: "<b>Instrument: " + instrument + "</b>", colspan: 4, style: "text-align: center;background-color:LightGrey;"})));
           } 
           var data_row = $("<tr />", {class: "fc-list-item", style: "cursor:pointer;"});
           data_row.append($("<td />", {class: "fc-list-item-time fc-widget-content",  html: ev.start.toJSON() + " (" + ev.data["# of Days"] + "d)"}));
@@ -118,6 +153,21 @@ Responsible for the scroller, and forwarding event-related actions into the "gri
       //target.append($("<pre />", {text: JSON.stringify(events, null, 2) }));
     }
   });
+  
+  function subtractInnerElHeight(outerEl, innerEl) {
+    var both = outerEl.add(innerEl);
+    var diff;
+
+    // effin' IE8/9/10/11 sometimes returns 0 for dimensions. this weird hack was the only thing that worked
+    both.css({
+      position: 'relative', // cause a reflow, which will force fresh dimension recalculation
+      left: -1 // ensure reflow in case the el was already relative. negative is less likely to cause new scroll
+    });
+    diff = outerEl.outerHeight() - innerEl.outerHeight(); // grab the dimensions
+    both.css({ position: '', left: '' }); // undo hack
+
+    return diff;
+  }
 
   
 })($.fullCalendar);
