@@ -19,6 +19,7 @@ function get_sans_events(instrument) {
           } else {
             $.get(sans_calendar_url + instrument + ".json").then(function(schedule) {
                 sans_events_cache[instrument] = schedule.map(convert_sans_to_fullcal, {instrument: instrument});
+                sans_events_cache[instrument].sort(function(a,b) { return b.data.start - a.data.start });
                 callback(sans_events_cache[instrument]);
             }).fail(function() { callback([]) });
           }
@@ -41,20 +42,21 @@ function convert_sans_to_fullcal(item) {
     return {name: n, principalInvestigator: (i==0), affiliation_index: ""};
   });
   ims_item["Participants"] = participants;
+  ims_item["Title"] = item.title;
   var start = new Date(item["month"] + ' ' + item["date"] + ", " + item["year"]);
   if (isNaN(start.getTime())) { start = new Date(0);  } // bad date.  resets to 1970.
   start.setHours(0); // reset to midnight...
   ims_item["Start Date"] = start.toDateString();
+  ims_item.start = start;
   
-  var title = item.unique_id || "";
   var primaryInvestigator = participants[0].name;
   ims_item.primaryInvestigator = primaryInvestigator;
   ims_item["# of Days"] = item.days;
   ims_item["Equipment"] = [item.equip] || [];
   ims_item["Contact"] = item.localcontact || "";
-  ims_item.ID = item.unique_id + " " + item.reqno || "";
-  var title = ims_item.Title = item.unique_id + " " + item.title;
-  
+  ims_item.ID = item.unique_id + " " + (item.reqno || "");
+  var title = (item.unique_id == null) ? "" : item.unique_id;
+  title += " " + item.title;
   fullcal.title = title;
   fullcal.start = start.toISOString();
   var end = addDays(start, parseInt(item.days || 0));
