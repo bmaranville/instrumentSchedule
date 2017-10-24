@@ -3,7 +3,9 @@ var sans_instruments = {
   "NG7": "ng7",
   "NG3SANS": "ng3",
   "NGB30SANS": "ng3",
-  "NG3": "ng3"
+  "NG3": "ng3",
+  "BT5": "bt5",
+  "USANS": "bt5"
 }
 
 var sans_calendar_url = "https://ncnr.nist.gov/instrumentSchedule/sansdata/";
