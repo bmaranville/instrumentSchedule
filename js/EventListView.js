@@ -4,9 +4,81 @@ Responsible for the scroller, and forwarding event-related actions into the "gri
 
 (function(FC) {
   var View = FC.View;
+  var ListView = FC.ListView;
+  var BasicView = FC.BasicView;
   var Grid = FC.Grid;
   var Scroller = FC.Scroller;
+  
+  FC.EventRenderer = FC.EventRenderer.extend({
+    compareEventSegs: function(seg1, seg2) {
+      var f1 = seg1.footprint.componentFootprint;
+      var r1 = f1.unzonedRange;
+      var f2 = seg2.footprint.componentFootprint;
+      var r2 = f2.unzonedRange;
 
+      return r1.startMs - r2.startMs || // earlier events go first
+        //(r2.endMs - r2.startMs) - (r1.endMs - r1.startMs) || // tie? longer events go first
+        //f2.isAllDay - f1.isAllDay || // tie? put all-day events first (booleans cast to 0/1)
+        compareByFieldSpecs(
+          seg1.footprint.eventDef,
+          seg2.footprint.eventDef,
+          this.view.eventOrderSpecs
+        );
+    }
+  });
+  
+  var NewMonthRenderer = FC.MonthView.eventRendererClass
+  
+  FC.views.newmonth = FC.MonthView.extend({
+    constructor: function() {
+      FC.MonthView.prototype.constructor.apply(this, arguments);
+      console.log(this.eventRendererClass);
+      console.log(this.dayGridClass);
+      
+    },
+    dayGridClass: FC.MonthView.prototype.dayGridClass.extend({
+      eventRendererClass: FC.MonthView.prototype.dayGridClass.prototype.eventRendererClass.extend({
+        compareEventSegs: function(seg1, seg2) {
+          var f1 = seg1.footprint.componentFootprint;
+          var r1 = f1.unzonedRange;
+          var f2 = seg2.footprint.componentFootprint;
+          var r2 = f2.unzonedRange;
+
+          return r1.startMs - r2.startMs || // earlier events go first
+            //(r2.endMs - r2.startMs) - (r1.endMs - r1.startMs) || // tie? longer events go first
+            //f2.isAllDay - f1.isAllDay || // tie? put all-day events first (booleans cast to 0/1)
+            FC.compareByFieldSpecs(
+              seg1.footprint.eventDef,
+              seg2.footprint.eventDef,
+              this.view.eventOrderSpecs
+            ) ||
+            (r2.endMs - r2.startMs) - (r1.endMs - r1.startMs) || // tie? longer events go first
+            f2.isAllDay - f1.isAllDay // tie? put all-day events first (booleans cast to 0/1)
+        }
+      })
+    })
+    //eventRendererClass: FC.DayGrid.prototype.eventRendererClass
+  });
+  
+  // A cmp function for determining which segments should take visual priority
+	/*
+   compareEventSegs: function(seg1, seg2) {
+		var f1 = seg1.footprint.componentFootprint;
+		var r1 = f1.unzonedRange;
+		var f2 = seg2.footprint.componentFootprint;
+		var r2 = f2.unzonedRange;
+
+		return r1.startMs - r2.startMs || // earlier events go first
+			(r2.endMs - r2.startMs) - (r1.endMs - r1.startMs) || // tie? longer events go first
+			f2.isAllDay - f1.isAllDay || // tie? put all-day events first (booleans cast to 0/1)
+			compareByFieldSpecs(
+				seg1.footprint.eventDef,
+				seg2.footprint.eventDef,
+				this.view.eventOrderSpecs
+			);
+	}
+  */
+  
   FC.views.newlist = FC.View.extend({
     renderEvents: function(events) {
       this.el.addClass("fc-listYear-view"); 
@@ -35,49 +107,42 @@ Responsible for the scroller, and forwarding event-related actions into the "gri
 
   });
   
-  FC.views.shortlist = FC.View.extend({
-    constructor: function() {
-      View.apply(this, arguments);
+  var UnbrokenListView = ListView.extend({
+    componentFootprintToSegs: function(footprint) {
+      var dayRanges = this.dayRanges;
+      var dayIndex = 0;
+      var segRange;
+      var seg;
+      var segs = [];
+      
+      // don't chop into individual days.
+      var segRange = footprint.unzonedRange;
+      if (segRange) {
+        seg = {
+          startMs: segRange.startMs,
+          endMs: segRange.endMs,
+          isStart: segRange.isStart,
+          isEnd: segRange.isEnd,
+          dayIndex: dayIndex++
+        };
 
-      this.scroller = new Scroller({
-        overflowX: 'auto',
-        overflowY: 'auto'
-      });
-    },
-
-
-    renderSkeleton: function() {
-      this.el.addClass(
-        'fc-list-view ' +
-        this.calendar.theme.getClass('listView')
-      );
-
-      this.scroller.render();
-      this.scroller.el.appendTo(this.el);
-
-      this.contentEl = this.scroller.scrollEl; // shortcut
-    },
-    
-    unrenderSkeleton: function() {
-      this.scroller.destroy(); // will remove the Grid too
-    },
-
-    updateSize: function(totalHeight, isAuto, isResize) {
-      this.scroller.setHeight(this.computeScrollerHeight(totalHeight));
-    },
-
-    computeScrollerHeight: function(totalHeight) {
-      return totalHeight -
-        subtractInnerElHeight(this.el, this.scroller.el); // everything that's NOT the scroller
-    },
-    
-    renderEvents: function(events) {
+        segs.push(seg);
+      }
+      return segs;
+    }
+  });
+  
+  FC.views.seglist = UnbrokenListView.extend({
+    renderSegList: function(allSegs) {
       this.el.addClass("fc-listYear-view"); 
       var target = $("<table />" , {class: "fc-list-table"}).append($("<tbody />"));
       this.scroller.el.empty();
       this.scroller.el.append(target);
       var instrument = null;
-      events.forEach(function(ev) {
+      allSegs.forEach(function(seg) {
+        var eventDef = seg.footprint.eventDef;
+        var ev = eventDef.miscProps;
+        var start = eventDef.dateProfile.start;
         //console.log(ev.data.instrument_name, instrument);
         if (ev.data) {
           if (ev.data.instrument_name != instrument) {
@@ -85,7 +150,7 @@ Responsible for the scroller, and forwarding event-related actions into the "gri
             target.append($("<tr />").append($("<td />", {html: "<b>Instrument: " + instrument + "</b>", colspan: 4, style: "text-align: center;background-color:LightGrey;"})));
           } 
           var data_row = $("<tr />", {class: "fc-list-item", style: "cursor:pointer;"});
-          data_row.append($("<td />", {class: "fc-list-item-time fc-widget-content",  html: ev.start.toJSON() + " (" + ev.data["# of Days"] + "d)"}));
+          data_row.append($("<td />", {class: "fc-list-item-time fc-widget-content",  html: start.format("YYYY-MM-DD") + " (" + ev.data["# of Days"] + "d)"}));
           data_row.append($("<td />", {class: "fc-list-item-time fc-widget-content",
             html: "<b>" + ev.data.ID + "</b>"})); // <em>(" + ev.data._parsed_participants.names[0] + ")</em> "}));
           data_row.append($("<td />", {class: "fc-list-item-time fc-widget-content",  html: "<em>" + ev.data.primaryInvestigator + "</em> "}));
@@ -95,11 +160,12 @@ Responsible for the scroller, and forwarding event-related actions into the "gri
         }
       });
     }
-
+    
   });
   
-  FC.views.fulltable = FC.views.list.class.extend({
-    renderEvents: function(events) {
+  
+  FC.views.fulltable = UnbrokenListView.extend({
+    renderSegList: function(allSegs) {
       var headers = ["Start Date", "# of Days", "ID", "Title", "Participants", "Institution Name", "Equipment", "Contact"]
       var renderers = {
         "Start Date": function(data) {
@@ -131,11 +197,14 @@ Responsible for the scroller, and forwarding event-related actions into the "gri
       var theadrow; thead.append(theadrow = $("<tr />"));
       var tbody = target.append($("<tbody />"));
       headers.forEach(function(h) { theadrow.append($("<th />", {text: h})) });
-      if (events.length == 0) {
+      if (allSegs.length == 0) {
         target.append($("<h3 />", {text: "No events for this instrument"}));
       }
       else {
-        events.forEach(function(ev) {
+        allSegs.forEach(function(seg) {
+          var eventDef = seg.footprint.eventDef;
+          var ev = eventDef.miscProps;
+          var start = eventDef.dateProfile.start;
           var data = ev.data;
           if (data) {
             var row = $("<tr />");

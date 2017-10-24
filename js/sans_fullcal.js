@@ -46,7 +46,7 @@ function convert_sans_to_fullcal(item) {
   ims_item["Participants"] = participants;
   ims_item["Title"] = item.title;
   var start = new Date(item["month"] + ' ' + item["date"] + ", " + item["year"]);
-  if (isNaN(start.getTime())) { start = new Date(0);  } // bad date.  resets to 1970.
+  if (isNaN(start.getTime())) { start = new Date("1971-01-01");  } // bad date.  resets to 1971.
   start.setHours(0); // reset to midnight...
   ims_item["Start Date"] = start.toDateString();
   ims_item.start = start;
@@ -62,7 +62,7 @@ function convert_sans_to_fullcal(item) {
   title += " " + item.title;
   fullcal.title = title;
   fullcal.start = start.toISOString();
-  var end = addDays(start, parseInt(item.days || 0));
+  var end = addDays(start, parseInt(item.days || 1));
   fullcal.end = end.toISOString();
   fullcal.data = ims_item;
   fullcal.data.instrument_name = this.instrument;

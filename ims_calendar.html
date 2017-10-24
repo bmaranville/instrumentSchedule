@@ -141,7 +141,7 @@
         header: {
           left: 'prev,next today',
           center: 'title',
-          right: 'month,basicWeek,table,short,newshort'
+          right: 'month,basicWeek,table,short,nm'
         },
         theme: true,
         //customButtons: {newevent: {text: 'newevent'}},
@@ -164,15 +164,17 @@
             buttonText: "table"
           },
           short: {
-            type: "shortlist",
+            type: "seglist",
             duration: {year: 1},
             buttonText: "short"
           },
-          newshort: {
-            type: "list",
-            duration: {year: 1},
-            buttonText: "newshort",
-            renderEvents: function(events) { console.log(events) }
+          nm: {
+            type: "newmonth",
+            buttonText: "nm",
+            duration: {month: 1},
+            //eventOrder: function(a,b) { console.log(a,b,this); 
+            //  return a.miscProps.data.instrument_name.localeCompare(b.miscProps.data.instrument_name)
+            //}
           }
         },
         viewRender: function(fc) {
