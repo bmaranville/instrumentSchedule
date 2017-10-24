@@ -56,6 +56,7 @@ function convert_sans_to_fullcal(item) {
   ims_item["Contact"] = item.localcontact || "";
   ims_item.ID = item.unique_id + " " + (item.reqno || "");
   var title = (item.unique_id == null) ? "" : item.unique_id;
+  title += " " + primaryInvestigator;
   title += " " + item.title;
   fullcal.title = title;
   fullcal.start = start.toISOString();
