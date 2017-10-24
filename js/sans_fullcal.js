@@ -6,7 +6,7 @@ var sans_instruments = {
   "NG3": "ng3"
 }
 
-var calendar_url = "https://ncnr.nist.gov/instrumentSchedule/sansdata/";
+var sans_calendar_url = "https://ncnr.nist.gov/instrumentSchedule/sansdata/";
 //var calendar_url = "https://www.ncnr.nist.gov/instruments/magik/php/instrument_schedule.php?id=";
 //var calendar_url = "https://tstweb.nist.gov:7302/NCNR-IMS/instrumentSchedule.do?instrId=";
 var sans_events_cache = {};
@@ -17,8 +17,8 @@ function get_sans_events(instrument) {
           if (sans_events_cache[instrument] != null) {
             callback(sans_events_cache[instrument]);
           } else {
-            $.get(calendar_url + instrument + ".json").then(function(schedule) {
-                sans_events_cache[instrument] = schedule.map(convert_to_fullcal, {instrument: instrument});
+            $.get(sans_calendar_url + instrument + ".json").then(function(schedule) {
+                sans_events_cache[instrument] = schedule.map(convert_sans_to_fullcal, {instrument: instrument});
                 callback(sans_events_cache[instrument]);
             }).fail(function() { callback([]) });
           }
@@ -33,7 +33,7 @@ function get_items(instrument) {
     });
 }
 
-function convert_to_fullcal(item) {
+function convert_sans_to_fullcal(item) {
   var fullcal = {};
   var ims_item = {};
   ims_item.affiliations = [];
@@ -47,9 +47,11 @@ function convert_to_fullcal(item) {
   ims_item["Start Date"] = start.toDateString();
   
   var title = item.unique_id || "";
-  var primaryInvestigator = participants[0];
+  var primaryInvestigator = participants[0].name;
   ims_item.primaryInvestigator = primaryInvestigator;
   ims_item["# of Days"] = item.days;
+  ims_item["Equipment"] = [item.equip] || [];
+  ims_item["Contact"] = item.localcontact || "";
   ims_item.ID = item.unique_id + " " + item.reqno || "";
   var title = ims_item.Title = item.unique_id + " " + item.title;
   
