@@ -4,6 +4,7 @@ import re
 
 HEADER_REGEX = re.compile(r'^([0-9]+)d\s+([^\s]+)\s+([0-9]+)')
 PARAM_REGEX = re.compile(r'^\s*!([^\s\^:]+):*\s*([^\s]*.*)$')
+COMMENT_REGEX = re.compile(r'^\s*#')
 FILENAME_REGEX = re.compile(r's([0-9]+)_([0-9]+)_([0-9]+)\.txt$')
 
 def parse_sanscal(cal, **kw):
@@ -11,6 +12,10 @@ def parse_sanscal(cal, **kw):
     current_key = None
     new_entry = None
     for line in cal.splitlines():
+        comment = COMMENT_REGEX.match(line)
+        if comment:
+            continue
+            
         header = HEADER_REGEX.match(line)
         param = PARAM_REGEX.match(line)
         if header:
