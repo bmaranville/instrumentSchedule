@@ -12,6 +12,12 @@ var reactor_schedule;
         "JUNE 8 - JULY 16",
         "AUGUST 3 - SEPTEMBER 10"
       ]
+    },
+    {
+      year: "2018",
+      operating: [
+        "JANUARY 4 - FEBRUARY 11"
+      ]
     }
   ];
             
