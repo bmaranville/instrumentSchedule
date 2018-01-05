@@ -16,7 +16,7 @@ var reactor_schedule;
     {
       year: "2018",
       operating: [
-        "JANUARY 4 - FEBRUARY 11"
+        "JANUARY 8 - FEBRUARY 15"
       ]
     }
   ];
