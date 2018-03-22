@@ -18,7 +18,9 @@ var reactor_schedule;
       operating: [
         "JANUARY 8 - FEBRUARY 16",
         "MARCH 1 - APRIL 8",
-        "APRIL 25 - JUNE 2"
+        "APRIL 25 - JUNE 2",
+        "JUNE 15 - JULY 23",
+        "AUGUST 8 - AUGUST 25"
       ]
     }
   ];
