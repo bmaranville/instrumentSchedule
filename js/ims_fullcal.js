@@ -28,7 +28,8 @@ var instrument_numbers = {
   "NG6M": 53,
   "NG6U": 52,
   "VT5": 18,
-  "NG7INT": 21
+  "NG7INT": 21,
+  "VSANS": 192
 }
 
 var calendar_url = "https://www-s.nist.gov/NCNR-IMS/instrumentSchedule.do?instrId=";
