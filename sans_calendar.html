@@ -76,37 +76,37 @@
     
     function show_summary(summary) {
       var dialog = $("#info_dialog")
-      dialog.find(".title").text(summary.title || "");
-      dialog.find(".length-days").text(summary.days || 0);
+      dialog.find(".title").text(summary.Title);
+      dialog.find(".length-days").text(summary["# of Days"]);
       dialog.find(".add-to-calendar").replaceWith(
         createCalendar({
           options: { class: 'ui-button' },
           data:{
-            title: summary.instrument_name + " experiment: " + (summary.title || ""), 
-            start: summary.start,
-            duration: parseFloat(summary.days || 1) * 24 * 60, // minutes
+            title: summary.instrument_name + " experiment: " + summary.Title, 
+            start: new Date(summary["Start Date"]),
+            duration: parseFloat(summary["# of Days"]) * 24 * 60, // minutes
             address: "NIST Center for Neutron Research: " + summary.instrument_name + " instrument",
-            //description: summary.Title + '\nParticipants: ' + summary.Participants.map(function(p) { return p.name }).join(', ')
+            description: summary.Title + '\nParticipants: ' + summary.Participants.map(function(p) { return p.name }).join(', ')
           }
         }));
-      dialog.find(".start-date").text(summary.start);
-      dialog.find(".equipment").text(summary.equip || "");
-      dialog.find(".local-contact").text(summary.localcontact);
-      //var participants = summary.Participants;
-      //var participants_item = dialog.find(".participants-list");
-      //participants_item.empty();
-      //participants.forEach(function(p, i) {
-      //  var classname = (p.principalInvestigator) ? "principalInvestigator": null;
-      //  var html =  p.name + '<sup>' + p.affiliation_index + ((p.principalInvestigator) ? ",PI" : "") + '</sup>';
-      //  participants_item.append($("<li />", {class: classname, html: html}));
-      //});
-      //var institutions = summary.affiliations;
-      //var institutions_item = dialog.find(".institutions-list");
-      //institutions_item.empty();
-      //institutions.forEach(function(p, i) {
-      //  institutions_item.append($("<li />", {html: p}));
-      //});
-      $("#info_dialog").dialog({height: 'auto', width: 'auto', title: summary.instrument_name + " " + summary.unique_id || ""});
+      dialog.find(".start-date").text(summary["Start Date"]);
+      dialog.find(".equipment").text(summary["Equipment"]);
+      dialog.find(".local-contact").text(summary["Contact"]);
+      var participants = summary.Participants;
+      var participants_item = dialog.find(".participants-list");
+      participants_item.empty();
+      participants.forEach(function(p, i) {
+        var classname = (p.principalInvestigator) ? "principalInvestigator": null;
+        var html =  p.name + '<sup>' + p.affiliation_index + ((p.principalInvestigator) ? ",PI" : "") + '</sup>';
+        participants_item.append($("<li />", {class: classname, html: html}));
+      });
+      var institutions = summary.affiliations;
+      var institutions_item = dialog.find(".institutions-list");
+      institutions_item.empty();
+      institutions.forEach(function(p, i) {
+        institutions_item.append($("<li />", {html: p}));
+      });
+      $("#info_dialog").dialog({height: 'auto', width: 'auto', title: summary.instrument_name + " " + summary.ID});
       $(".ui-dialog-titlebar").addClass("ui-state-active");
     }
     
