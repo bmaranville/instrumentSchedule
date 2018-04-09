@@ -219,7 +219,7 @@
           var color_pair = colors[instr_num++%colors.length];
           var legend = $("<span />", {class: "instrument-legend", text: k, style: "background-color:" + color_pair[0] + ";color:" + color_pair[1] + ";"});
           $("#instrument_select").append(legend);
-          sources[k] = get_events(k);
+          sources[k] = get_sans_events(k);
           sources[k].color = color_pair[0];
           sources[k].textColor = color_pair[1];
           $("#calendar").fullCalendar('addEventSource', sources[k]);
