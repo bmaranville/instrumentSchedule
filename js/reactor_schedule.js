@@ -19,8 +19,10 @@ var reactor_schedule;
         "JANUARY 8 - FEBRUARY 16",
         "MARCH 1 - APRIL 8",
         "APRIL 25 - JUNE 2",
-        "JUNE 15 - JULY 23",
-        "AUGUST 8 - AUGUST 25"
+        "JUNE 15 - JUNE 22",
+        "JUNE 25 - JULY 25",
+        "AUGUST 8 - AUGUST 25",
+        "SEPTEMBER 5 - SEPTEMBER 28"
       ]
     }
   ];
